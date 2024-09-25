@@ -1,0 +1,19 @@
+{
+    "javascript.updateImportsOnFileMove.enabled": "always",
+    "editor.formatOnPaste": true,
+    "editor.formatOnSave": true,
+    "editor.formatOnSaveMode": "modifications",
+    "editor.guides.bracketPairs": true,
+    "editor.parameterHints.enabled": true,
+    "eslint.format.enable": true,
+    "eslint.lintTask.enable": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": "always"
+    },
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "[javascript]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "vite.devCommand": "npm run dev",
+    "vite.open": false
+  }

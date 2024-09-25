@@ -1,0 +1,46 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Dev setup",
+        "type": "shell",
+        "command": "echo 'started'",
+		"dependsOn": ["npm: dev - frontend", "npm: start - backend"]
+		},
+		{
+			"type": "npm",
+			"script": "dev",
+			"path": "frontend",
+			"problemMatcher": {
+				"base": "$tsc-watch",
+				
+				"background": {
+					"activeOnStart": true,
+					"beginsPattern": ".",
+					"endsPattern": "."
+				}
+			},
+
+			"label": "npm: dev - frontend",
+			"detail": "vite",
+			"isBackground": true
+		},
+		{
+			"type": "npm",
+			"script": "start",
+			"path": "backend",
+			"problemMatcher": {
+				"base": "$tsc",
+				
+				"background": {
+					"activeOnStart": false,
+					"beginsPattern": "nodemon",
+					"endsPattern": "8081"
+				}
+			},
+			"isBackground": true,
+			"label": "npm: start - backend",
+			"detail": "nodemon server.js"
+		}
+	]
+}

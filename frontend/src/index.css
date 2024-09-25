@@ -1,0 +1,31 @@
+@font-face {
+  font-family: 'Proxima Nova';
+  src: url('path-to-proxima-nova.woff2') format('woff2'),
+       url('path-to-proxima-nova.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+
+.idea-reactions {
+    display: flex;
+    justify-content: space-around;
+    padding-top: 10px;
+}
+
+.idea-reactions button {
+    background-color: #f7a706e3;
+    color: rgb(10, 0, 0);
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.idea-reactions :hover{
+  background-color: rgb(255, 183, 0);
+}
+
+.idea-reactions button:hover {
+    background-color: #9c6233;
+}
