@@ -9,29 +9,6 @@ const PageWrapper = styled.div`
   min-height: 100vh;
 `;
 
-const Sidebar = styled.div`
-  width: 200px;
-  background-color: #333; // Dark background for the sidebar
-  color: white;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-`;
-
-const SidebarItem = styled.a`
-  color: white;
-  text-decoration: none;
-  font-size: 18px;
-  padding: 10px;
-  border-radius: 5px;
-  transition: background-color 0.3s;
-
-  &:hover {
-    background-color: #53565A; // Charcoal
-  }
-`;
-
 const MainContent = styled.div`
   flex: 1;
   padding: 20px;
@@ -51,7 +28,6 @@ const Header = styled.div`
   height: 150px; // Adjust height as needed
   margin-left: 0px;
 `;
-
 
 const Logo = styled.img`
   height: 160px;
@@ -74,7 +50,7 @@ const Container = styled.div`
   max-width: 600px;
   margin: 20px auto;
   padding: 20px;
-  background-color: #FFFFFF;
+  background-color: #ffffff;
   border: 1px solid #000000;
   border-radius: 10px;
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
@@ -82,13 +58,13 @@ const Container = styled.div`
 
 const Title = styled.h1`
   font-family: "Proxima Nova", sans-serif;
-  color: #FFFFFF; 
+  color: #ffffff;
   margin: 0;
   font-size: 36px;
 `;
 
 const FormHeader = styled.h2`
-  color: #F26522; // Pantone Orange
+  color: #f26522; // Pantone Orange
   text-align: center;
 `;
 
@@ -129,7 +105,8 @@ const TextArea = styled.textarea`
   border: 1px solid #000000;
   border-radius: 5px;
   margin-bottom: 15px;
-  font-size: 12px;
+  font-size: 14px;
+  font-family: Montserrat;
   resize: none;
 `;
 
@@ -178,10 +155,8 @@ const categories = [
   "Workplace Suggestion",
 ];
 
-
 // Main component
 const IdeaForm = () => {
-
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
   const [hashtags, setHashtags] = useState([]);
@@ -191,6 +166,7 @@ const IdeaForm = () => {
   const [selectedReactions, setSelectedReactions] = useState({}); // Track reactions for each idea
   const [message, setMessage] = useState("");
   const [reactionsCount, setReactionsCount] = useState({});
+  const [searchTerm, setSearchTerm] = useState(""); // NEW: state for search term
 
   const formatDateToEST = (utcDateString) => {
     const date = new Date(utcDateString);
@@ -224,14 +200,57 @@ const IdeaForm = () => {
       });
   }, []);
 
+  const fetchIdeas = () => {
+    fetch("http://localhost:8081/ideas")
+      .then((response) => response.json())
+      .then((data) => {
+        setIdeas(data);
+
+        // Fetch reactions for each idea
+        data.forEach((idea) => {
+          fetchReactions(idea.id);
+        });
+      })
+      .catch((error) => {
+        console.error("Error fetching ideas:", error);
+      });
+  };
+
+  // Fetch all ideas on component mount
+  useEffect(() => {
+    fetchIdeas();
+  }, []);
+
+  // Handle search button click
+  const handleSearch = () => {
+    if (searchTerm.trim() === "") {
+      fetchIdeas(); // If search is empty, fetch all ideas
+    } else {
+      // Fetch filtered ideas based on search term from backend
+      fetch(
+        `http://localhost:8081/ideas/search?query=${encodeURIComponent(
+          searchTerm
+        )}`
+      )
+        .then((response) => response.json())
+        .then((data) => {
+          setIdeas(data); // Update the ideas list with the search result
+        })
+        .catch((error) => {
+          console.error("Error searching ideas:", error);
+        });
+    }
+  };
+
   // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
+    const currentDate = new Date().toISOString(); // Capture the current date and time
     const ideaData = {
       description,
       category,
-      userlogin,
-      created_at,
+      userlogin: "sathishv", // Use actual logged-in user here
+      created_at: currentDate, // Use the current date
       hashtags: hashtags.join(","),
     };
 
@@ -248,8 +267,8 @@ const IdeaForm = () => {
         setDescription("");
         setCategory("");
         setHashtags([]);
-        setUserlogin("");
-        setCreatedAt("");
+        setUserlogin("sathishv"); // Reset with actual user name
+        setCreatedAt(currentDate); // Reset the date with the new date
         // Optimistically add new idea at the top of the list
         setIdeas([ideaData, ...ideas]);
       })
@@ -268,22 +287,22 @@ const IdeaForm = () => {
   };
 */
 
-const getIconForCategory = (category) => {
-  switch (category) {
-    case "Product Feature":
-      return "product.png"; // Replace with the actual path to your icon
-    case "Workplace Suggestion":
-      return "workplace.svg";
-    case "Business Model":
-      return "business.svg";
-    case "Technical Improvement":
-      return "technology.png";
-    case "Process Optimisation":
-      return "process.svg";
-    default:
-      return "/icons/default.svg"; // Fallback icon
-  }
-};
+  const getIconForCategory = (category) => {
+    switch (category) {
+      case "Product Feature":
+        return "product.png"; // Replace with the actual path to your icon
+      case "Workplace Suggestion":
+        return "workplace.svg";
+      case "Business Model":
+        return "business.svg";
+      case "Technical Improvement":
+        return "technology.png";
+      case "Process Optimisation":
+        return "process.svg";
+      default:
+        return "/icons/default.svg"; // Fallback icon
+    }
+  };
 
   // Fetch reactions count for an idea
   const fetchReactions = (ideaId) => {
@@ -309,9 +328,8 @@ const getIconForCategory = (category) => {
   };
 
   const handleReaction = async (ideaId, reaction) => {
-
     try {
-      const userlogin = "tswift"; // Replace this with the actual logged-in user
+      const userlogin = "reactionUser"; // Replace this with the actual logged-in user
 
       // Log payload being sent to the server
       console.log("Sending reaction:", { userlogin, reaction });
@@ -338,7 +356,6 @@ const getIconForCategory = (category) => {
             [reaction]: (prev[ideaId]?.[reaction] || 0) + 1,
           },
         }));
-        
       } else {
         const errorMsg = await response.text();
         console.error("Error details:", errorMsg);
@@ -367,7 +384,9 @@ const getIconForCategory = (category) => {
 
         {/* Idea Form */}
         <Container>
-          <Label>Ignite Your Idea</Label>
+          <FormHeader>Ignite Your Idea</FormHeader>
+
+          <Label> Enter a detailed description of your idea </Label>
           <form onSubmit={handleSubmit}>
             {/* Text Area */}
             <TextArea
@@ -377,7 +396,7 @@ const getIconForCategory = (category) => {
             />
 
             {/* Dropdown for Categories */}
-            <Label>Idea Category</Label>
+            <Label>Pick an idea category into which your idea falls </Label>
             <Dropdown
               value={category}
               onChange={(e) => setCategory(e.target.value)}
@@ -390,7 +409,9 @@ const getIconForCategory = (category) => {
             </Dropdown>
 
             {/* Hashtag Input with react-tagsinput */}
-            <Label>Enter Hashtags</Label>
+            <Label>
+              Add one or more hashtags to make your idea more searchable{" "}
+            </Label>
             <TagsInput
               value={hashtags}
               onChange={(tags) => setHashtags(tags)}
@@ -400,11 +421,33 @@ const getIconForCategory = (category) => {
             {/* Submit Button */}
             <PostButton type="submit">Ignite !</PostButton>
           </form>
+        </Container>
 
+        <Container>
+          {/* Search Area */}
+          <FormHeader> Search Ignited Ideas</FormHeader>
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Search by description, category or hashtag"
+            style={{
+              width: "90%",
+              padding: "10px",
+              borderRadius: "5px",
+              marginBottom: "15px",
+              fontSize: "14px",
+              fontFamily: "Montserrat",
+            }}
+          />
+          <PostButton type="button" onClick={handleSearch}>
+            Search
+          </PostButton>
+
+          {/* Display filtered ideas */}
           <div className="ideas-list">
             {/* Separation between ideas */}
             <br></br>
-            <hr className="idea-divider" />
 
             {ideas.map((idea) => (
               <div key={idea.id} className="idea-container">
@@ -438,7 +481,7 @@ const getIconForCategory = (category) => {
                     <button onClick={() => handleReaction(idea.id, "LIKED")}>
                       🚨 {reactionsCount[idea.id]?.LIKED || 0}
                     </button>
-                    <button onClick={() => handleReaction(idea.id, 'INSPIRED')}>
+                    <button onClick={() => handleReaction(idea.id, "INSPIRED")}>
                       🚀 {reactionsCount[idea.id]?.INSPIRED || 0}
                     </button>
 

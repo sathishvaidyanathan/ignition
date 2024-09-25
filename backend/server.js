@@ -55,7 +55,6 @@ reactioncount desc`;
     // Default sort: by created_at, descending
     query += " ORDER BY created_at DESC";
   }
-
   // Run the query with search values
   db.query(query, [searchValue, searchValue, searchValue], (err, data) => {
     if (err) {
@@ -68,6 +67,38 @@ reactioncount desc`;
 
 //////
 
+// Search route
+app.get('/ideas/search', (req, res) => {
+  const searchTerm = req.query.query;
+
+  if (!searchTerm) {
+    return res.status(400).json({ error: 'Search query is required' });
+  }
+
+  // Query to search across description, hashtags, category, and userlogin fields
+  const sql = `
+    SELECT * FROM ideas
+    WHERE 
+      description LIKE ? OR 
+      hashtags LIKE ? OR
+      category LIKE ? OR
+      userlogin LIKE ?
+  `;
+
+  // Use '%' wildcard to search for matches containing the searchTerm
+  const searchPattern = `%${searchTerm}%`;
+
+  db.query(sql, [searchPattern, searchPattern, searchPattern, searchPattern], (err, results) => {
+    if (err) {
+      return res.status(500).json({ error: 'Database query failed' });
+    }
+
+    // Send back the results
+    res.json(results);
+  });
+});
+
+//////
 // Get reaction counts for each idea
 app.get("/ideas/:id/reactions", (req, res) => {
   const { id } = req.params;
